@@ -1,0 +1,42 @@
+% Lire l'image du microscope optique
+image = imread('C200D150 CETIOL-EAU+1%SDS 60x 2.jpg');
+
+% Variables du code
+diam_bounds = [10 70]; % Diamètre max et min
+
+ratio = 18.11; % pixels/micrometre (résolution du microscope)
+% Améliorer le contraste de l'image
+grayImage = rgb2gray(image);
+
+% Détecter les cercles dans l'image
+% Les diamètre doivent être définis en fonction de la taille attendue des cercles
+
+[centers, radii] = imfindcircles(grayImage, diam_bounds, 'ObjectPolarity', 'dark', 'Sensitivity', 0.87);
+
+% Calculer les diamètres des cercles
+
+diameters = 2 * radii / ratio;
+
+% Calculer le diamètre moyen et l'écart type
+meanDiameter = mean(diameters);
+stdDiameter = std(diameters);
+
+% Afficher l'image originale
+figure;
+subplot(1, 2, 1);
+imshow(image);
+title('Image Originale');
+
+% Afficher l'image avec les cercles détectés
+subplot(1, 2, 2);
+imshow(grayImage);
+hold on;
+viscircles(centers, radii, 'EdgeColor', 'b');
+title('Cercles Détectés');
+
+% Afficher les informations de mesure
+numCircles = length(diameters);
+infoText = sprintf('Nombre de cercles: %d\nDiamètre moyen: %.2f μm\nÉcart type: %.2f μm', numCircles, meanDiameter, stdDiameter);
+annotation('textbox', [0.7, 0.1, 0.2, 0.2], 'String', infoText, 'FitBoxToText', 'on');
+
+hold off;
